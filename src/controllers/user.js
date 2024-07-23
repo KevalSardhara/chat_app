@@ -44,7 +44,7 @@ exports.signin = async (req, res, next) => {
                 { mobile: mobile }
             ]
         };
-        let user = await User.findOne(search, {__v : 0});
+        let user = await User.findOne(search, {__v : 0}).lean();
         if(!user) {
             throw new Error("Something went wrong. Please try again later");
         }
