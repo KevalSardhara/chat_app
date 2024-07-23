@@ -12,7 +12,6 @@ exports.signup = async (req, res, next) => {
             password,
             role : "user"
         });
-        console.log("user", user);
         await user.save();
 
         return res.status(200).send({
@@ -20,6 +19,30 @@ exports.signup = async (req, res, next) => {
                 user,
             },
             message: "User created successfully",
+            status : 200,
+        });
+    } catch (e) {
+        // console.log(e);
+        return res.status(200).send({
+            data: "",
+            message: e.message,
+            status : 400,
+        });
+    }
+}
+
+exports.signin = async (req, res, next) => {
+    try {
+        let {mobile, email, password} = req.body;
+        let user = await User.userSignin(req.body);
+        delete req.body.password;
+
+
+        return res.status(200).send({
+            data : {
+                user,
+            },
+            message: "success",
             status : 200,
         });
     } catch (e) {

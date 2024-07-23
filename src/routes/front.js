@@ -9,7 +9,7 @@ const formData = multer().none();
 const fs = require("fs");
 
 router.route("/signup").post(formData, userController.signup);
-router.route("/signin").post();
+router.route("/signin").post(formData, userController.signin);
 router.route("/profile").get();
 
 module.exports = router;

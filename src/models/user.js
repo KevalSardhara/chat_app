@@ -63,7 +63,6 @@ userSchema.methods.toJSON = function () {
 userSchema.statics.userSignup = async function (userData) {
     let user;
     let {username, email, mobile, profile, token, password} = userData;
-    console.log(userData);
     if((!username || username == undefined && username == "") || !(email || mobile) || !password || password == undefined || password == "") {
         throw new Error("Please provide all the required fields");
     }
@@ -88,6 +87,37 @@ userSchema.statics.userSignup = async function (userData) {
 
     return userObject;
 }
+
+
+
+userSchema.statics.userSignin = async function (userData) {
+    let user;
+    let {username, email, mobile, profile, token, password} = userData;
+    if((!username || username == undefined && username == "") || !(email || mobile) || !password || password == undefined || password == "") {
+        throw new Error("Please provide all the required fields");
+    }
+    
+    // Check if email or mobile already exists
+    let checkIsExists = {
+        $or : [
+            {email : email},
+            {mobile : mobile}
+        ]
+    };        
+    user = await User.findOne(checkIsExists);
+    if(user) {
+        throw new Error("User already exists. Please use Different Email or Mobile");
+    }
+    let userObject = {};
+    userObject.email = (email != undefined && email) ? email : "";
+    userObject.mobile = (mobile != undefined && mobile) ? mobile : "";
+    userObject.username = (username != undefined && username) ? username : "";
+    userObject.token = (token != undefined && token) ? token : "";
+    userObject.profile = (profile != undefined && profile) ? profile : "";
+
+    return userObject;
+}
+
 
 // Hash the plain text password before saving
 userSchema.pre('save', async function (next) {
