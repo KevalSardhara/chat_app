@@ -62,7 +62,19 @@ exports.signin = async (req, res, next) => {
             secure: true, // Cookie will only be sent over HTTPS
             httpOnly: true, // Cookie cannot be accessed via client-side scripts
             sameSite: "None",
+            secure: process.env.NODE_ENV === "development",
           });
+
+          // app.get("/login", (req, res) => {
+          //   const token = jwt.sign({ id: 7, role: "captain" }, "YOUR_SECRET_KEY");
+          //   return res
+          //     .cookie("access_token", token, {
+          //       httpOnly: true,
+          //       secure: process.env.NODE_ENV === "production",
+          //     })
+          //     .status(200)
+          //     .json({ message: "Logged in successfully 😊 👌" });
+          // });
 
         return res.status(200).send({
             data : {
@@ -86,10 +98,10 @@ exports.signin = async (req, res, next) => {
 exports.dashboard = async (req, res, next) => {
     try {
         let user = req.user;
+        user = await User.findById(user._id);
+        console.log(req.headers);
         return res.status(200).send({
-            data: {
-                user,
-            },
+            user,
             message: "User created successfully",
             status: 200,
         });
