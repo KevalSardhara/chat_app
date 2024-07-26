@@ -115,6 +115,26 @@ exports.dashboard = async (req, res, next) => {
     }
 }
 
+exports.logout = async (req, res, next) => {
+    try {
+        let user = req.user;
+        user = await User.findOne({_id:user._id});
+        user.token = "";
+        await user.save();
+        return res.clearCookie('token').status(200).send({
+            user,
+            message: "success",
+            status: 200,
+        });
+    } catch (e) {
+        return res.status(200).send({
+            data: "",
+            message: "Somthing Went Wrong",
+            status: 400,
+        });
+    }
+}
+
 
 
 

@@ -11,5 +11,6 @@ const fs = require("fs");
 router.route("/signup").post(formData, userController.signup);
 router.route("/signin").post(formData, userController.signin);
 router.route("/dashboard").get(checkAuth, userController.dashboard);
+router.route("/logout").post(checkAuth, userController.logout);
 
 module.exports = router;

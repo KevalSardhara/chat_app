@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    is_online: {
+        type: Boolean,
+        required: false
+    },
     token: {
         type: String,
         default: "",
