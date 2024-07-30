@@ -7,7 +7,8 @@ const path = require("path");
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const routerFrontAPI = require('./src/routes/front');
-
+const EventEmitter = require('events');
+global.myEmitter = new EventEmitter();
 dotenv.config({
     path: "./.env",
 });
@@ -45,23 +46,23 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use("/public", express.static(path.join(path.resolve(), "/public"))); // Uncomment this line to serve static files
 
-// Handle new connections
-io.on('connection', (socket) => {
-    console.log('A user connected');
+// // Handle new connections
+// io.on('connection', (socket) => {
+//     console.log('A user connected');
 
-    // Handle a custom event
-    socket.on('message', (data) => {
-        console.log('Message received:', data);
+//     // Handle a custom event
+//     socket.on('message', (data) => {
+//         console.log('Message received:', data);
 
-        // Broadcast to all clients
-        io.emit('message', data);
-    });
+//         // Broadcast to all clients
+//         io.emit('message', data);
+//     });
 
-    // Handle disconnection
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
-});
+//     // Handle disconnection
+//     socket.on('disconnect', () => {
+//         console.log('User disconnected');
+//     });
+// });
 
 app.use("/front", routerFrontAPI);
 // app.use("/admin", routerAdmin); // Comming Soon
