@@ -7,7 +7,8 @@ const path = require("path");
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const routerFrontAPI = require('./src/routes/front');
-
+const EventEmitter = require('events');
+global.myEmitter = new EventEmitter();
 dotenv.config({
     path: "./.env",
 });
@@ -17,6 +18,9 @@ const PORT = process.env.PORT || 3000;
 app.set('view engine', 'ejs');
 app.set("views", path.join(path.resolve(), "./src/views"));
 app.use(cookieParser());
+
+// Socket Events
+/*
 
 const { Server } = require("socket.io");
 const httpServer = http.createServer(app);
@@ -41,9 +45,6 @@ const io = new Server(httpServer, {
     }
 });
 // console.log(io);
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use("/public", express.static(path.join(path.resolve(), "/public"))); // Uncomment this line to serve static files
 
 // Handle new connections
 io.on('connection', (socket) => {
@@ -63,6 +64,11 @@ io.on('connection', (socket) => {
     });
 });
 
+*/
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use("/public", express.static(path.join(path.resolve(), "/public"))); // Uncomment this line to serve static files
+
 app.use("/front", routerFrontAPI);
 // app.use("/admin", routerAdmin); // Comming Soon
 
@@ -74,15 +80,16 @@ app.use((req, res, next) => {
         message: 'Authorization required',
         req: Object.assign({ url: req.originalUrl }, { params: req.query }, { body: req.body })
     }
-
+/* 
     // Save history in Database for in direct access by the user
     // let webhook = new Webhook({
     //     ...request,
     // })
     // await webhook.save()
+ */
     res.status(200).send(default_response);
 })
-
+/* 
 // all error handling hear
 // app.use((err, req, res, next) => {
 //     return res.status(200).json({
@@ -90,12 +97,13 @@ app.use((req, res, next) => {
 //         message: err.message,
 //         status: 400,
 //     });
-// });
+// }); */
+require('./socket');
 
 db(process.env.MONGODB_URL || "")
     .then(async (result) => {
         console.log("result", process.env.MONGODB_URL);
-        await httpServer.listen(PORT, () => {
+        await app.listen(PORT, () => {
             console.log("Server running on port", PORT);
         });
     })
