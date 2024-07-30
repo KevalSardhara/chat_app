@@ -29,7 +29,7 @@ const io = new Server(httpServer, {
 });
 // Handle new connections
 io.on('connection', (socket) => {
-    console.log('A user connected');
+    console.log('A user connected', socket);
 
     // Handle a custom event
     socket.on('message', (data) => {
@@ -43,4 +43,9 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('User disconnected');
     });
+});
+
+
+httpServer.listen(process.env.SOCKET_PORT, () => {
+    console.log("::::::::::: Socket Connected :::::::::::", process.env.SOCKET_PORT);
 });
