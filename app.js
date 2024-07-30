@@ -20,7 +20,7 @@ app.set("views", path.join(path.resolve(), "./src/views"));
 app.use(cookieParser());
 
 // Socket Events
-/*
+
 
 const { Server } = require("socket.io");
 const httpServer = http.createServer(app);
@@ -64,7 +64,7 @@ io.on('connection', (socket) => {
     });
 });
 
-*/
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use("/public", express.static(path.join(path.resolve(), "/public"))); // Uncomment this line to serve static files
@@ -98,12 +98,13 @@ app.use((req, res, next) => {
 //         status: 400,
 //     });
 // }); */
-require('./socket');
+// require('./socket');
+
 
 db(process.env.MONGODB_URL || "")
     .then(async (result) => {
         console.log("result", process.env.MONGODB_URL);
-        await app.listen(PORT, () => {
+        await httpServer.listen(PORT, () => {
             console.log("Server running on port", PORT);
         });
     })

@@ -13,6 +13,10 @@ const { middleware } = require('express-ctx');
 const EventEmitter = require('events');
 global.myEmitter = new EventEmitter();
 
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use("/", express.static(path.join(path.resolve(), "/public"))); // Uncomment this line to serve static files
+
 mongoose.connect(process.env.MONGODB_URL).then((result) => {
   console.log("Connected to MongoDB");
 })
