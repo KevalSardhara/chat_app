@@ -11,10 +11,12 @@
     <script>
     const socket = io();
         console.log("socket", socket);
-
-        socket.emit("message", 123);
-        socket.emit("message1", 123);
-        socket.emit("message2", 123);
+        let message = {
+            sender : "Keval",
+            reciver : "Mehul",
+            message : "Hii, Bhai. How are you?"
+        }
+        socket.emit("message", message);
     </script>
 </body>
 </html>

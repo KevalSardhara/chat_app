@@ -48,14 +48,21 @@ const io = new Server(httpServer,/*  {
 
 // Handle new connections
 io.on('connection', (socket) => {
-    console.log('A user connected');
+    // console.log('A user connected', socket);
+    // console.log('A user connected', socket.id);
+    console.log('A user connected', socket.handshake.query);
+    // console.log('A user connected', socket.handshake.query.token);
 
     // Handle a custom event
     socket.on('message', (data) => {
         console.log('Message received:', data);
+        socket.on('listener', (data) => {
+            console.log('adddddd');
+            io.emit('replaytoyou', {data : "hello, thank you for connecting"});
+        });
 
         // Broadcast to all clients
-        io.emit('message', data);
+        io.emit('replay', {data : "hello, thank you for connecting"});
     });
 
     // Handle disconnection
