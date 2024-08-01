@@ -27,7 +27,7 @@ const httpServer = http.createServer(app);
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
 // Integrate Socket.IO with proper options
-const io = new Server(httpServer, {
+const io = new Server(httpServer,/*  {
     cors: {
         // methods: ['GET', 'POST'], // Allow specific methods
         // allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
@@ -43,7 +43,7 @@ const io = new Server(httpServer, {
             return callback(null, true);
         },
     }
-});
+} */);
 // console.log(io);
 
 // Handle new connections
@@ -105,7 +105,7 @@ db(process.env.MONGODB_URL || "")
     .then(async (result) => {
         console.log("result", process.env.MONGODB_URL);
         await httpServer.listen(PORT, () => {
-            console.log("Server running on port", PORT);
+            console.log("Server running on port ::::::::::::::::::::::::::::", PORT);
         });
     })
     .catch((error) => {
