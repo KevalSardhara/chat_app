@@ -9,6 +9,8 @@ const cookieParser = require('cookie-parser');
 const routerFrontAPI = require('./src/routes/front');
 const EventEmitter = require('events');
 global.myEmitter = new EventEmitter();
+
+const User = require('./src/models/user');
 dotenv.config({
     path: "./.env",
 });
@@ -47,22 +49,57 @@ const io = new Server(httpServer,/*  {
 // console.log(io);
 
 // Handle new connections
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
     // console.log('A user connected', socket);
     // console.log('A user connected', socket.id);
-    console.log('A user connected', socket.handshake.query);
+    // console.log('A user connected', socket.handshake.query);
     // console.log('A user connected', socket.handshake.query.token);
 
-    // Handle a custom event
-    socket.on('message', (data) => {
-        console.log('Message received:', data);
-        socket.on('listener', (data) => {
-            console.log('adddddd');
-            io.emit('replaytoyou', {data : "hello, thank you for connecting"});
-        });
+    var socketId = socket.id;
+    var clientIp = socket.request.connection.remoteAddress;
+    console.log('New connection ' + socketId + ' from ' + clientIp);
 
+    // Join the room with the user's token
+    if(socket.handshake.query.token) {
+        // socket.join(socket.handshake.query.token); // Join the room with the user's token
+        io.to(socketId).emit('private', {data : "You are Join"});
+        console.log('A user connected', socketId);
+    }
+    let user = await User.findOne({token: socket.handshake.query.token});
+    if (!user) {
+        console.log('A user disconnected', socket.handshake.query.token);
+        let responce = {
+            event : "resConnectionError",
+            data : {
+                socket_id : socketId,
+            },
+            status : 400,
+            message :"Somthing went wrong! Please try again later",
+        };
+        io.to(socketId).emit('resConnectionError', responce);
+        return socket.disconnect();
+    } else {
+        console.log('A user connected', socket.handshake.query.token);
+        let responce = {
+            event : "resConnected",
+            data : {
+                socket_id : socketId,
+            },
+            status : 200,
+            message :"Somthing went wrong! Please try again later",
+        };
+        io.to(socketId).emit('resConnected', responce);
+    }
+
+    // Handle a custom event
+    socket.on('reqMessage', (data) => {
+        console.log('Message received:', data);
         // Broadcast to all clients
-        io.emit('replay', {data : "hello, thank you for connecting"});
+        io.emit('resMessage', {data : "hello, thank you for connecting"});
+    });
+    socket.on('listener', (data) => {
+        console.log('add listener:', data);
+        io.emit('replaytoyou', {data : "hello, thank you for connecting"});
     });
 
     // Handle disconnection
