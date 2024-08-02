@@ -95,7 +95,16 @@ io.on('connection', async (socket) => {
     socket.on('reqMessage', (data) => {
         console.log('Message received:', data);
         // Broadcast to all clients
-        io.emit('resMessage', {data : "hello, thank you for connecting"});
+        let responce = {
+            event : "resConnected",
+            data : {
+                message : "hello, thank you for connecting",
+                socket_id : socketId,
+            },
+            status : 200,
+            message :"success",
+        };
+        io.emit('resMessage', responce);
     });
     socket.on('listener', (data) => {
         console.log('add listener:', data);
