@@ -43,11 +43,16 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         required: true
+    },
+    socket_id: {
+        type: String,
+        default: "",
     }
 },
     {
         timestamps: true
-    });
+    }
+);
 
 
 
