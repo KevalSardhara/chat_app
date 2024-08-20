@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const routerFrontAPI = require('./src/routes/front');
 const EventEmitter = require('events');
+const { updateConnectionArr } = require("./src/helpers/update.socket");
 global.myEmitter = new EventEmitter();
 
 const User = require('./src/models/user');
@@ -61,7 +62,7 @@ const io = new Server(httpServer,  {
     }
 });
 global.io = io;
-
+let connectionArr = [];
 // Handle new connections
 io.on('connection', async (socket) => {
     // console.log('A user connected', socket);
@@ -73,13 +74,45 @@ io.on('connection', async (socket) => {
     var clientIp = socket.request.connection.remoteAddress;
     let token = null;
     let user = null;
-    console.log('New connection ' + socket_id + ' from ' + clientIp);
+    socket.join("chat_ludo");
+    console.log('New connection ' + socket_id + ' from ' + clientIp, ":::::::::::", socket.rooms);
+    
+    // Active Connection
+    // io.on('connection', (socket) => {
+    //     console.log(`Active connections: ${Object.keys(io.sockets.sockets).length}`);
+    // });
+
+    // Always clean up listeners after disconnect
+    // io.on('connection', (socket) => {
+    //     socket.on('disconnect', () => {
+    //         socket.removeAllListeners();
+    //     });
+    // });
 
     // Join the room with the user's token
     if(socket.handshake.query.token) {
         // socket.join(socket.handshake.query.token); // Join the room with the user's token
+        
         token= socket.handshake.query.token;
         user = await User.findOne({token: token});
+        // if(user.is_online == true && user.socket_id != "") {
+        //     // let socket_id = socket.id;
+        //     user.is_online = false;
+        //     user.socket_id = "";
+        //     await user.save();
+        //     let responce = {
+        //         event : "resConnectionError",
+        //         data : {
+        //             socket_id,
+        //         },
+        //         status : 400,
+        //         message :"login to another device",
+        //     };
+        //     connectionArr = await updateConnectionArr(socket_id, connectionArr);
+        //     console.log('User disconnected login to another device', connectionArr, connectionArr.length);
+        //     io.to(socket_id).emit('resConnectionError', responce);
+        //     return socket.disconnect();
+        // }
     } else {
         let responce = {
             event : "resConnectionError",
@@ -87,7 +120,7 @@ io.on('connection', async (socket) => {
                 socket_id,
             },
             status : 400,
-            message :"Somthing went wrong! Token Not Found Plases Provide Token",
+            message :"Somthing went wrong! Token Not Found Plases Provide Token!",
         };
         io.to(socket_id).emit('resConnectionError', responce);
         return socket.disconnect();
@@ -104,20 +137,26 @@ io.on('connection', async (socket) => {
         io.to(socket_id).emit('resConnectionError', responce);
         return socket.disconnect();
     } else {
+        user.is_online = true;
+        user.socket_id = socket_id;
+        await user.save();
+        // socket.join(user._id);
+        console.log("socket>>>>>>>>>>>>>>>>>>>:::::::::>", socket.rooms);
+        connectionArr.push({socket_id, user_id: user._id});
         let responce = {
             event : "resConnected",
             data : {
                 socket_id,
                 is_online: true,
                 socket_id: socket_id,
+                message : `${user.username} is online`,
             },
-            status : 400,
-            message :"Somthing went wrong! Token Not Found Plases Provide Token",
+            status : 200,
+            message :"User connected on this token",
         };
-        user.is_online = true;
-        user.socket_id = socket_id;
-        await user.save();
-        io.to(socket_id).emit('resConnected', responce);
+        socket.broadcast.emit('resConnected', responce); // io.emit('resConnected', responce);
+        // socket.to("chat_ludo").emit('resConnected', responce); // io.to("chat_ludo").emit('resConnected', responce);
+        console.log('User connected', connectionArr, connectionArr.length);
     }
 
     // Handle a custom event
@@ -153,6 +192,7 @@ io.on('connection', async (socket) => {
 
     // Handle disconnection
     socket.on('disconnect', async () => {
+        // let socket_id = socket.id;
         user.is_online = false;
         user.socket_id = "";
         await user.save();
@@ -163,8 +203,9 @@ io.on('connection', async (socket) => {
             status : 400,
             message : `${user.username} is ofline`,
         };
+        connectionArr = await updateConnectionArr(socket_id, connectionArr);
         io.emit('resDisConnection', responce);
-        console.log('User disconnected');
+        console.log('User disconnected', connectionArr, connectionArr.length);
     });
 });
 

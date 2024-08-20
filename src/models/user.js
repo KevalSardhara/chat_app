@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         required: false
     },
+    is_active: {
+        type: Boolean,
+        required: false
+    },
     token: {
         type: String,
         default: "",
@@ -110,7 +114,7 @@ userSchema.methods.userSignin = async function (userPassword) {
 userSchema.pre('save', async function (next) {
     const user = this;
     const SALT_ROUNDS = 10;
-    console.log(user.isModified('password'))
+    // console.log(user.isModified('password'))
     if (user.isModified('password')) {
         user.password = await bcrypt.hash(user.password, SALT_ROUNDS)
     }
