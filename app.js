@@ -11,12 +11,13 @@ const EventEmitter = require('events');
 const { updateConnectionArr } = require("./src/helpers/update.socket");
 global.myEmitter = new EventEmitter();
 const jwt = require('jsonwebtoken');
+const responceHandler = require('./src/helpers/responce.helper');
 
 const User = require('./src/models/user');
 dotenv.config({
     path: "./.env",
 });
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.SOCKET_PORT || 3000;
 
 // #set
 app.set('view engine', 'ejs');
@@ -27,33 +28,11 @@ app.use(cookieParser());
 
 
 const { Server } = require("socket.io");
+const { listeners } = require("process");
 const httpServer = http.createServer(app);
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
-// Integrate Socket.IO with proper options
-/* const io = new Server(httpServer, {
-    cors: {
-        // methods: ['GET', 'POST'], // Allow specific methods
-        // allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
-        // credentials: true, // Allow cookies to be sent with requests
-        // optionsSuccessStatus: 200, // Some legacy browsers choke on 204
-        origin: function (req, callback) {
-            // Allow requests with no req (like mobile apps or curl requests)
-            if (!req) return callback(null, true);
-            if (allowedOrigins.indexOf(req) === -1) {
-                const msg = 'The CORS policy for this site does not allow access from the specified req.';
-                return callback(new Error(msg), false);
-            }
-            return callback(null, true);
-        },
-    }
-}); */
-// ============================================================================
-/* 
-npm install eiows
-require("eiows").Server;
- */
-// ============================================================================
+
 const io = new Server(httpServer, {
     pingInterval: 10000,
     pingTimeout: 30000,
@@ -81,147 +60,147 @@ let connectionArr = [];
 
 // Handle new connections
 io.on('connection', async (socket) => {
-    // console.log('A user connected', socket);
-    // console.log('A user connected', socket.id);
-    // console.log('A user connected', socket.handshake.query);
-    // console.log('A user connected', socket.handshake.query.token);
-
     var socket_id = socket.id;
     var clientIp = socket.request.connection.remoteAddress;
     let token = null;
     let user = null;
-    socket.join("chat_ludo");
-    console.log('New connection ' + socket_id + ' from ' + clientIp, ":::::::::::", socket.rooms);
+    // socket.join("chat_ludo");
+    // console.log('New connection ' + socket_id + ' from ' + clientIp, ":::::::::::", socket.rooms);
+    socket.removeAllListeners();
+    let responce = '';
+    console.log("SOCKET...:::::::::::::::::::::::::::::::::::...", socket_id);
     
-    // Active Connection
-    // io.on('connection', (socket) => {
-    //     console.log(`Active connections: ${Object.keys(io.sockets.sockets).length}`);
+    
+    // socket.on('ping', (params, callback) => {
+    //     // in callback function
+    // ----------------------------------USE BELOW CODE FOR PING EVENT------------------------------------------------ //
+        // setInterval(() => {
+        //     io.to(socket_id).emit('ping', {socket_id: socket_id});
+        //     console.log("SOCKET...:::::::::::::::::::::::::::::::::::...", socket_id);
+        // }, 3000);
+    // --------------------------------------------------------------------------------------------------------------- //
+        //     params = {
+    //         ...params,
+    //         socket_id,
+    //     }
+    //     callback(params);
     // });
-
-    // Always clean up listeners after disconnect
-    // io.on('connection', (socket) => {
-    //     socket.on('disconnect', () => {
-    //         socket.removeAllListeners();
-    //     });
-    // });
-
-    // Join the room with the user's token
-    if (socket.handshake.query.token) {
-        // socket.join(socket.handshake.query.token); // Join the room with the user's token
+    
+    socket.on("join", async (params, callback) => {
+        // Join the room with the user's token
+        let data = {
+            socket_id,
+        };
+        if (socket.handshake.query.token == params.token) {
+            // socket.join(socket.handshake.query.token); // Join the room with the user's token
+            token= socket.handshake.query.token;
+            user = await User.findOne({token: token});
+            // if(user.is_online == true && user.socket_id != "") {
+            //     // let socket_id = socket.id;
+            //     user.is_online = false;
+            //     user.socket_id = "";
+            //     await user.save();
+            //     let responce = {
+            //         event : "resConnectionError",
+            //         data : {
+            //             socket_id,
+            //         },
+            //         status : 400,
+            //         message :"login to another device",
+            //     };
+            //     connectionArr = await updateConnectionArr(socket_id, connectionArr);
+            //     console.log('User disconnected login to another device', connectionArr, connectionArr.length);
+            //     io.to(socket_id).emit('resConnectionError', responce);
+            //     return socket.disconnect();
+            // }
+        } else {
+            responce = responceHandler.emitMessage('resConnectionError', data, 400, "Somthing went wrong! Token Not Found Plases Provide Token!");
+            io.to(socket_id).emit('resConnectionError', responce);
+            return socket.disconnect();
+        }
         
-        token= socket.handshake.query.token;
-        user = await User.findOne({token: token});
-        // if(user.is_online == true && user.socket_id != "") {
-        //     // let socket_id = socket.id;
-        //     user.is_online = false;
-        //     user.socket_id = "";
-        //     await user.save();
-        //     let responce = {
-        //         event : "resConnectionError",
-        //         data : {
-        //             socket_id,
-        //         },
-        //         status : 400,
-        //         message :"login to another device",
-        //     };
-        //     connectionArr = await updateConnectionArr(socket_id, connectionArr);
-        //     console.log('User disconnected login to another device', connectionArr, connectionArr.length);
-        //     io.to(socket_id).emit('resConnectionError', responce);
-        //     return socket.disconnect();
-        // }
-    } else {
-        let responce = {
-            event: "resConnectionError",
-            data: {
-                socket_id,
-            },
-            status : 400,
-            message :"Somthing went wrong! Token Not Found Plases Provide Token!",
-        };
-        io.to(socket_id).emit('resConnectionError', responce);
-        return socket.disconnect();
-    }
-    if (!user) {
-        let responce = {
-            event: "resConnectionError",
-            data: {
-                socket_id,
-            },
-            status: 400,
-            message: "Somthing went wrong! Please try again later",
-        };
-        io.to(socket_id).emit('resConnectionError', responce);
-        return socket.disconnect();
-    } else {
-        user.is_online = true;
-        user.socket_id = socket_id;
-        await user.save();
-        // socket.join(user._id);
-        console.log("socket>>>>>>>>>>>>>>>>>>>:::::::::>", socket.rooms);
-        connectionArr.push({socket_id, user_id: user._id});
-        let responce = {
-            event : "resConnected",
-            data : {
+        if (!user) {
+            responce = responceHandler.emitMessage('resConnectionError', data, 400, "Somthing went wrong!");
+            io.to(socket_id).emit('resConnectionError', responce);
+            return socket.disconnect();
+        } else {
+            user.is_online = true;
+            user.socket_id = socket_id;
+            await user.save();
+            // socket.join(user._id);
+            connectionArr.push({socket_id, user_id: user._id});
+            data = {
                 socket_id,
                 is_online: true,
                 socket_id: socket_id,
                 message : `${user.username} is online`,
-            },
-            status : 200,
-            message :"User connected on this token",
-        };
-        socket.broadcast.emit('resConnected', responce); // io.emit('resConnected', responce);
-        // socket.to("chat_ludo").emit('resConnected', responce); // io.to("chat_ludo").emit('resConnected', responce);
-        console.log('User connected', connectionArr, connectionArr.length);
-    }
+            };
+            responce = responceHandler.emitMessage('resConnected', data, 200, "User connected on this token");
+            callback(responce);
+            // RESPONCE WITH LISTNERS
+            // socket.broadcast.emit('resConnected', responce);
+            // console.log('User connected', connectionArr, connectionArr.length);
+        }
+    });
 
+    socket.on("joinRoom", (params, callback) => {
+        socket.join(params.roomId);
+    });
+    
     // Handle a custom event
-    socket.on('reqMessage', (data) => {
+    socket.on('reqMessage', (params, callback) => {
+        let data = {
+            socket_id,
+        };
         // console.log('Message received:', data);
         // Broadcast to all clients
-        let responce = {
-            event: "resMessage",
-            data: {
-                ...data,
-                message: "hello, thank you for connecting",
-                socket_id,
-            },
-            status: 200,
-            message: "success",
+        data = {
+            ...params,
+            message: "hello, thank you for connecting",
+            socket_id,
         };
+        let responce = responceHandler.emitMessage('resMessage', data, 200, "success");
+        // callback(responce);
         io.emit('resMessage', responce);
     });
 
-    socket.on('reqListener', (data) => {
-        let responce = {
-            event: "resListener",
-            data: {
-                ...data,
-                message: "Listening to socket",
-                socket_id,
-            },
-            status: 200,
-            message: "success",
+    socket.on('reqListener', (params, callback) => {
+        let data = {
+            socket_id,
         };
-        io.emit('resListener', responce);
+        data = {
+            ...params,
+            message: "Listening to socket",
+            socket_id,
+        };
+        responce = responceHandler.emitMessage('resListener', data, 200, "success");
+        callback(responce);
+        // io.emit('resListener', responce);
     });
-
+    
     // Handle disconnection
     socket.on('disconnect', async () => {
         // let socket_id = socket.id;
-        user.is_online = false;
-        user.socket_id = "";
-        await user.save();
-
-        let responce = {
-            event: "resDisConnection",
-            data: {},
-            status: 400,
-            message: `${user.username} is ofline`,
+        let data = {
+            socket_id,
         };
+        let message = "";
+        if(user) {
+            user.is_online = false;
+            user.socket_id = "";
+            await user.save();
+            message = `${user.username} is ofline`;
+        } else {
+            message = "somthing went wrong! connection disconnected";
+        }
+        
+        data = {
+            ...data,
+        };
+        let responce = responceHandler.emitMessage('resDisConnection', data, 400, message);
         connectionArr = await updateConnectionArr(socket_id, connectionArr);
         io.emit('resDisConnection', responce);
-        console.log('User disconnected', connectionArr, connectionArr.length);
+        // console.log('User disconnected', connectionArr, connectionArr.length);
     });
 });
 
