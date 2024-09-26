@@ -10,6 +10,7 @@ const routerFrontAPI = require('./src/routes/front');
 const EventEmitter = require('events');
 const { updateConnectionArr } = require("./src/helpers/update.socket");
 global.myEmitter = new EventEmitter();
+const jwt = require('jsonwebtoken');
 
 const User = require('./src/models/user');
 dotenv.config({
@@ -53,7 +54,7 @@ npm install eiows
 require("eiows").Server;
  */
 // ============================================================================
-const io = new Server(httpServer,  {
+const io = new Server(httpServer, {
     pingInterval: 10000,
     pingTimeout: 30000,
     cors: {
@@ -63,6 +64,21 @@ const io = new Server(httpServer,  {
 });
 global.io = io;
 let connectionArr = [];
+
+/* io.use((socket, next) => {
+    const token = socket.handshake.query.token;
+    if (token) {
+        jwt.verify(token, process.env.JWT_SECRET_TOKEN, (err, decoded) => {
+            if (err) return next(new Error('Authentication error'));
+            socket.user = decoded;
+            console.log("socket.user", socket.user, socket.id);
+            next();
+        });
+    } else {
+        next(new Error('Authentication error'));
+    }
+}); */
+
 // Handle new connections
 io.on('connection', async (socket) => {
     // console.log('A user connected', socket);
@@ -90,7 +106,7 @@ io.on('connection', async (socket) => {
     // });
 
     // Join the room with the user's token
-    if(socket.handshake.query.token) {
+    if (socket.handshake.query.token) {
         // socket.join(socket.handshake.query.token); // Join the room with the user's token
         
         token= socket.handshake.query.token;
@@ -115,8 +131,8 @@ io.on('connection', async (socket) => {
         // }
     } else {
         let responce = {
-            event : "resConnectionError",
-            data : {
+            event: "resConnectionError",
+            data: {
                 socket_id,
             },
             status : 400,
@@ -127,12 +143,12 @@ io.on('connection', async (socket) => {
     }
     if (!user) {
         let responce = {
-            event : "resConnectionError",
-            data : {
+            event: "resConnectionError",
+            data: {
                 socket_id,
             },
-            status : 400,
-            message :"Somthing went wrong! Please try again later",
+            status: 400,
+            message: "Somthing went wrong! Please try again later",
         };
         io.to(socket_id).emit('resConnectionError', responce);
         return socket.disconnect();
@@ -164,28 +180,28 @@ io.on('connection', async (socket) => {
         // console.log('Message received:', data);
         // Broadcast to all clients
         let responce = {
-            event : "resMessage",
-            data : {
+            event: "resMessage",
+            data: {
                 ...data,
-                message : "hello, thank you for connecting",
+                message: "hello, thank you for connecting",
                 socket_id,
             },
-            status : 200,
-            message :"success",
+            status: 200,
+            message: "success",
         };
         io.emit('resMessage', responce);
     });
 
     socket.on('reqListener', (data) => {
         let responce = {
-            event : "resListener",
-            data : {
+            event: "resListener",
+            data: {
                 ...data,
-                message : "Listening to socket",
+                message: "Listening to socket",
                 socket_id,
             },
-            status : 200,
-            message :"success",
+            status: 200,
+            message: "success",
         };
         io.emit('resListener', responce);
     });
@@ -196,12 +212,12 @@ io.on('connection', async (socket) => {
         user.is_online = false;
         user.socket_id = "";
         await user.save();
-        
+
         let responce = {
-            event : "resDisConnection",
-            data : {},
-            status : 400,
-            message : `${user.username} is ofline`,
+            event: "resDisConnection",
+            data: {},
+            status: 400,
+            message: `${user.username} is ofline`,
         };
         connectionArr = await updateConnectionArr(socket_id, connectionArr);
         io.emit('resDisConnection', responce);
@@ -225,13 +241,13 @@ app.use((req, res, next) => {
         message: 'Authorization required',
         req: Object.assign({ url: req.originalUrl }, { params: req.query }, { body: req.body })
     }
-/* 
-    // Save history in Database for in direct access by the user
-    // let webhook = new Webhook({
-    //     ...request,
-    // })
-    // await webhook.save()
- */
+    /* 
+        // Save history in Database for in direct access by the user
+        // let webhook = new Webhook({
+        //     ...request,
+        // })
+        // await webhook.save()
+     */
     res.status(200).send(default_response);
 })
 /* 
