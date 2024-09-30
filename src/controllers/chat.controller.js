@@ -5,8 +5,8 @@ const mongoose = require("mongoose");
 exports.available_friends = async (req, res, next) => {
     try {
         const user = req.user;
-        
-        const chatRequsetInfo = await Chat.aggreate([
+        const filterResult = { password : 0, __v : 0, status : 0, is_account_deleted : 0 };
+        const chatRequsetInfo = await Chat.aggregate([
             {   
                 $match: {
                     group_type_number: 2,
@@ -31,7 +31,7 @@ exports.available_friends = async (req, res, next) => {
             }
         ]);
         
-        const friends = await User.find({ _id : chatRequsetInfo.length != 0 ? chatRequsetInfo[0].user_id : user._id, status : 1, is_account_deleted : 0 }, filterResult);
+        const friends = await User.find({ _id : chatRequsetInfo.length != 0 ? { $nin : chatRequsetInfo[0].user_id } : { $ne : user._id }, status : 1, is_account_deleted : 0 }, filterResult);
 
         return res.status(200).json({
             data : friends,

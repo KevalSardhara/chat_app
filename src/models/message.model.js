@@ -49,5 +49,5 @@ const messageSchema = new mongoose.Schema({
     timestamps: true
 });
 
-const ChatMessage = mongoose.models || mongoose.model("Chat_Message", messageSchema);
+const ChatMessage = mongoose.model("Chat_Message", messageSchema);
 module.exports = ChatMessage;
