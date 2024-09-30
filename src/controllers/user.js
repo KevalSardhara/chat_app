@@ -56,6 +56,7 @@ exports.signin = async (req, res, next) => {
         user.token = token;
         user.save();
 
+
         res.cookie("token", token, {
             path: "/", // Cookie is accessible from all paths
             expires: new Date(Date.now() + 86400000), // Cookie expires in 1 day
@@ -78,7 +79,7 @@ exports.signin = async (req, res, next) => {
 
         return res.status(200).send({
             data : {
-                user,
+              user : user.toObject(),
                 isValid,
             },
             message: "success",

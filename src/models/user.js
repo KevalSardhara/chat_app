@@ -48,10 +48,30 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    status: {
+        type: Number,
+        default: 1,
+    },
+    is_account_deleted: {
+        type: Boolean,
+        default: false,
+    },
     socket_id: {
         type: String,
         default: "",
-    }
+    },
+    userJoinedRoom : [{
+        room_id : {
+            type : mongoose.Schema.Types.ObjectId,
+            ref: 'Chat',
+        },
+        room_id_number : {
+            type : String,
+            default : 0,
+            // required : true,
+            // unique : true
+        }
+    }]
 },
     {
         timestamps: true

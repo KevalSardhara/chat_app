@@ -245,7 +245,7 @@ db(process.env.MONGODB_URL || "")
     .then(async (result) => {
         console.log("result", process.env.MONGODB_URL);
         await httpServer.listen(PORT, () => {
-            console.log("Server running on port ::::::::::::::::::::::::::::", PORT);
+            console.log("Server running on port :::::::::::::::::::::::::::: ...APPLICATION STARTED FOR APPLY IPO...", PORT);
         });
     })
     .catch((error) => {
