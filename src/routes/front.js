@@ -11,9 +11,9 @@ const fs = require("fs");
 
 router.route("/signup").post(formData, userController.signup);
 router.route("/signin").post(formData, userController.signin);
-router.route("/dashboard").get(checkAuth, userController.dashboard);
-router.route("/logout").post(checkAuth, userController.logout);
-router.route("/available_friends").post(checkAuth, chatController.available_friends);
-router.route("/send_friend_request").post(checkAuth, chatController.send_friend_request);
+router.route("/dashboard").get(formData, checkAuth, userController.dashboard);
+router.route("/logout").post(formData, checkAuth, userController.logout);
+router.route("/available_friends").post(formData, checkAuth, chatController.available_friends);
+router.route("/send_friend_request").post(formData, checkAuth, chatController.send_friend_request);
 
 module.exports = router;

@@ -4,6 +4,7 @@ const chattSchema = mongoose.Schema;
 const chatSchema = new mongoose.Schema({
     room_id_number: {
         type: String,
+        unique: true,
         default: "1",
     },
     request_accept: {
@@ -22,7 +23,7 @@ const chatSchema = new mongoose.Schema({
     },
     participant_count : {
         type : Number,
-        default : 1
+        default : 2
     },
     status_type : {
         type: String,
