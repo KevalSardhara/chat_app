@@ -12,6 +12,7 @@ const { updateConnectionArr } = require("./src/helpers/update.socket");
 global.myEmitter = new EventEmitter();
 const jwt = require('jsonwebtoken');
 const responceHandler = require('./src/helpers/responce.helper');
+const chatDirectController = require('./src/controllers/chatDirect.controller');
 
 const User = require('./src/models/user');
 dotenv.config({
@@ -86,7 +87,7 @@ io.on('connection', async (socket) => {
     //     callback(params);
     // });
     
-    socket.on("join", async (params, callback) => {
+    socket.on("join", async (params, callback = () => {}) => {
         // Join the room with the user's token
         let data = {
             socket_id,
@@ -143,12 +144,34 @@ io.on('connection', async (socket) => {
         }
     });
 
-    socket.on("joinRoom", (params, callback) => {
+    socket.on("joinRoom", async (params, callback = () => {}) => {
         socket.join(params.roomId);
     });
     
+    socket.on("getAvailableUser", async (params, callback = () => {}) => {
+        let data = { socket_id };
+        callback(data);
+    });
+//  =============================================================================================================================================
+    // FIRST CHATT MESSAGE FOR CREATE ROOM
+    socket.on("chatMessage", async (params, callback = () => {}) => {
+        let data = {
+            socket_id,
+        };
+        const getUserForChat = await chatDirectController.getUserForChat(params, data);
+        callback(data);
+    });
+
+/*     socket.on("sendMessage", (params, callback = () => {}) => {
+        let data = {
+            socket_id,
+        };
+        callback();
+    }); */
+//  =============================================================================================================================================
+
     // Handle a custom event
-    socket.on('reqMessage', (params, callback) => {
+    socket.on('reqMessage', (params, callback = () => {}) => {
         let data = {
             socket_id,
         };
@@ -164,7 +187,7 @@ io.on('connection', async (socket) => {
         io.emit('resMessage', responce);
     });
 
-    socket.on('reqListener', (params, callback) => {
+    socket.on('reqListener', (params, callback = () => {}) => {
         let data = {
             socket_id,
         };
@@ -203,7 +226,6 @@ io.on('connection', async (socket) => {
         // console.log('User disconnected', connectionArr, connectionArr.length);
     });
 });
-
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

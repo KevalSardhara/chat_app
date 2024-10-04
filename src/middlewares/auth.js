@@ -11,7 +11,7 @@ exports.userAuthorized = async (req, res, next) => {
     try {
         const token = req.headers.authorization.split(' ')[1];
         let user = jwt.verify(token, process.env.JWT_SECRET_TOKEN);
-        if(req.cookies.token == undefined) {
+        if(req?.cookies?.token == undefined) {
             throw new Error("Unauthorized Login Required");
         }
         if(token != (req.cookies.token).toString()) {

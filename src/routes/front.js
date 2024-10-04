@@ -6,7 +6,7 @@ const { userAuthorized: checkAuth } = require("../middlewares/auth");
 const chatController = require("../controllers/chat.controller");
 const multer = require("multer");
 const upload = multer();
-const formData = multer().none();
+const formData = multer().none(); // In case you need to handle a text-only multipart form, you should use the .none() method
 const fs = require("fs");
 
 router.route("/signup").post(formData, userController.signup);

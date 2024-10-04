@@ -7,27 +7,19 @@ const chatSchema = new mongoose.Schema({
         unique: true,
         default: "1",
     },
-    request_accept: {
-        type: Boolean,
-        default: false
-    },
     group_type : {
         type: String,
         default: "one_on_one", // one_on_one, group
-        enum: ["one_on_one", "group"]
+        enum: ["one_on_one", "group", "community"]
     },
     group_type_number : {
         type: Number,
-        default: 2, // one_on_one: 2, group: 3
+        default: 2, // one_on_one: 2, group: 3, community : 4
         enum: [2, 3]
     },
     participant_count : {
         type : Number,
         default : 2
-    },
-    status_type : {
-        type: String,
-        default: "pending", // pending, accepted, rejected
     },
     sender_id: {
         type: mongoose.Schema.Types.ObjectId,
@@ -37,13 +29,13 @@ const chatSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     },
+    is_block: {
+        type: Boolean,
+        default: false
+    },
     group_members: {
         type: Array,
         default: [],
-    },
-    request_history : {
-        type: Object,
-        default: {}
     },
     status: {
         type: Number,
@@ -57,5 +49,5 @@ const chatSchema = new mongoose.Schema({
     timestamps: true
 });
 
-const Chat = mongoose.model("Chat", chatSchema);
-module.exports = Chat;
+const ChatDirect = mongoose.model("chat_direct", chatSchema);
+module.exports = ChatDirect;
