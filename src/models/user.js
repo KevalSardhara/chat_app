@@ -28,7 +28,8 @@ const userSchema = new mongoose.Schema({
     },
     is_online: {
         type: Boolean,
-        required: false
+        required: false,
+        default: false
     },
     is_active: {
         type: Boolean,
@@ -46,7 +47,9 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        required: true
+        enum: ["user", "ai_user", "admin", "super_admin"],
+        required: true,
+        default: "user",
     },
     status: {
         type: Number,

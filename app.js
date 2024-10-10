@@ -127,6 +127,10 @@ io.on('connection', async (socket) => {
         } else {
             user.is_online = true;
             user.socket_id = socket_id;
+
+            socket.userId = user._id;
+            socket.token = user.token;
+
             await user.save();
             // socket.join(user._id);
             connectionArr.push({socket_id, user_id: user._id});
