@@ -236,6 +236,35 @@ app.use(express.json());
 app.use("/public", express.static(path.join(path.resolve(), "/public"))); // Uncomment this line to serve static files
 
 app.use("/front", routerFrontAPI);
+
+app.get("/getProduct", async (req, res) => {
+    try {
+        const getProduct = new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve({
+                    id : 0,
+                    name : "LF_Fantasy",
+                    code : "LF_87588"
+                });
+            }, 3000);
+        })
+
+        const product = await getProduct;
+        res.status(200).send({
+            data : product,
+            message : error.message || "Somthing went wrong! Please try again later",
+            status : 200,
+        })
+    } catch (error) {
+        res.status(200).send({
+            data : {},
+            message : error.message || "Somthing went wrong! Please try again later",
+            status : 400,
+        })
+    }
+
+
+});
 // app.use("/admin", routerAdmin); // Comming Soon
 
 app.use((req, res, next) => {
