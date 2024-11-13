@@ -6,11 +6,17 @@
     <title>Document</title>
 </head>
 <body>
-    <div id="root">Socket.io</div>
+    <div id="root">Socket.io Chat App Connection</div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
     const socket = io();
-    console.log("socket", socket);
+        console.log("socket", socket);
+        let message = {
+            sender : "Keval",
+            reciver : "Mehul",
+            message : "Hii, Bhai. How are you?"
+        }
+        socket.emit("message", message);
     </script>
 </body>
 </html>

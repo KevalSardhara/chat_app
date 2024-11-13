@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         required: false
     },
+    is_active: {
+        type: Boolean,
+        required: false
+    },
     token: {
         type: String,
         default: "",
@@ -43,11 +47,36 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         required: true
-    }
+    },
+    status: {
+        type: Number,
+        default: 1,
+    },
+    is_account_deleted: {
+        type: Boolean,
+        default: false,
+    },
+    socket_id: {
+        type: String,
+        default: "",
+    },
+    userJoinedRoom : [{
+        room_id : {
+            type : mongoose.Schema.Types.ObjectId,
+            ref: 'Chat',
+        },
+        room_id_number : {
+            type : String,
+            default : 0,
+            // required : true,
+            // unique : true
+        }
+    }]
 },
     {
         timestamps: true
-    });
+    }
+);
 
 
 
@@ -105,7 +134,7 @@ userSchema.methods.userSignin = async function (userPassword) {
 userSchema.pre('save', async function (next) {
     const user = this;
     const SALT_ROUNDS = 10;
-    console.log(user.isModified('password'))
+    // console.log(user.isModified('password'))
     if (user.isModified('password')) {
         user.password = await bcrypt.hash(user.password, SALT_ROUNDS)
     }
