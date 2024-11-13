@@ -59,6 +59,7 @@ let connectionArr = [];
     }
 }); */
 
+
 // Handle new connections
 io.on('connection', async (socket) => {
     var socket_id = socket.id;
