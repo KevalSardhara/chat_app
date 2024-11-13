@@ -30,7 +30,7 @@ exports.signup = async (req, res, next) => {
         });
     }
 }
-
+// use valideter npm package hear for more validation
 exports.signin = async (req, res, next) => {
     try {
         let { mobile, email, password } = req.body;
